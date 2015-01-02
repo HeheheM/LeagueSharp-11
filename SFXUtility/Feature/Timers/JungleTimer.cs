@@ -42,9 +42,9 @@ namespace SFXUtility.Feature
 	{
 		#region Fields
 
-		private static readonly List<JungleCamp> _jungleCamps = new List<JungleCamp>();
-		private static readonly IList<DrawText> _DrawText = new List<DrawText>();
-		private static int _nextTime;
+		private readonly List<JungleCamp> _jungleCamps = new List<JungleCamp>();
+		private readonly IList<DrawText> _DrawText = new List<DrawText>();
+		private int _nextTime;
 		private Timers _timers;
 
 		#endregion
@@ -332,7 +332,7 @@ namespace SFXUtility.Feature
 							new JungleCamp(
 								"TT_Spiderboss", 300, new Vector3(7150f, 11100f, 60f),
 								new[] { "TT_Spiderboss8.1.1" },7));
-					}					
+					}
 					if (_jungleCamps.Count > 0)
 					{
 						foreach (var camp in _jungleCamps)
@@ -343,6 +343,8 @@ namespace SFXUtility.Feature
 						Game.OnGameUpdate += OnGameUpdate;
 						Drawing.OnEndScene += Drawing_OnEndScene;
 					}
+					else Game.PrintChat("Jungle Timer only supports SummonersRift and TwistedTreeline maps.");
+
 					Initialized = true;
 				}
 			}
@@ -378,7 +380,7 @@ namespace SFXUtility.Feature
 		
 		private class DrawText
 		{
-			private static int _layer;
+			private int _layer;
 			public Render.Text Text { get; set; }
 			public JungleCamp JungleCamp;
 			public DrawText(JungleCamp pos)

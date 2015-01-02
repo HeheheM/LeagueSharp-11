@@ -175,6 +175,7 @@ namespace JungleTimer
 				Game.OnGameUpdate += Game_OnGameUpdate;
 				Drawing.OnEndScene += Drawing_OnEndScene;
 			}
+			else Game.PrintChat("Jungle Timer only supports SummonersRift and TwistedTreeline maps.");
 		}
 		
 		private static void Game_OnGameLoad(EventArgs args)
