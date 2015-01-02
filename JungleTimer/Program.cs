@@ -14,7 +14,7 @@ namespace JungleTimer
 	internal class Program
 	{
 		private static readonly List<JungleCamp> _jungleCamps = new List<JungleCamp>();
-		private static readonly IList<DrawText> _DrawText = new List<DrawText>();
+		private static readonly List<DrawText> _DrawText = new List<DrawText>();
 		private static int _nextTime;
 
 		private static void Main(string[] args)

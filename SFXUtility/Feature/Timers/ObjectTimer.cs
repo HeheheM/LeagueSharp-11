@@ -272,7 +272,7 @@ namespace SFXUtility.Feature
                     {
                         foreach (Obj_BarracksDampener inhibitor in ObjectManager.Get<Obj_BarracksDampener>())
                         {
-                            _objectBarracks.Add(new ObjectBarrack(inhibitor, 240f, inhibitor.Health < 1f));
+                            _objectBarracks.Add(new ObjectBarrack(inhibitor, 300f, inhibitor.Health < 1f));
                         }
                     }
 

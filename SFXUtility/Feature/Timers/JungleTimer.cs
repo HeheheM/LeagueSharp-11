@@ -42,10 +42,10 @@ namespace SFXUtility.Feature
 	{
 		#region Fields
 
-		private readonly List<JungleCamp> _jungleCamps = new List<JungleCamp>();
-		private readonly IList<DrawText> _DrawText = new List<DrawText>();
 		private int _nextTime;
 		private Timers _timers;
+		private readonly List<JungleCamp> _jungleCamps = new List<JungleCamp>();
+		private readonly List<DrawText> _DrawText = new List<DrawText>();
 
 		#endregion
 
@@ -190,7 +190,7 @@ namespace SFXUtility.Feature
 					_timers = (o as Timers);
 
 					Menu = new Menu(Name, Name);
-										
+					
 					Menu.AddItem(new MenuItem(Name + "Format", "Format Time mm:ss").SetValue(false));
 
 					Menu.AddItem(new MenuItem(Name + "Enabled", "Enabled").SetValue(true));
@@ -348,8 +348,7 @@ namespace SFXUtility.Feature
 						Drawing.OnEndScene += Drawing_OnEndScene;
 					}
 					else Game.PrintChat("Jungle Timer only supports SummonersRift and TwistedTreeline maps.");
-
-					Initialized = true;
+					Initialized = true;					
 				}
 			}
 			catch (Exception ex)
@@ -407,7 +406,7 @@ namespace SFXUtility.Feature
 			private string FormatTime(int time)
 			{
 				var t = TimeSpan.FromSeconds(time);
-				if (format) return string.Format("{0:D1}:{1:D2}", t.Minutes, t.Seconds);					
+				if (format) return string.Format("{0:D1}:{1:D2}", t.Minutes, t.Seconds);
 				else return time.ToString(CultureInfo.InvariantCulture);
 			}
 		}
