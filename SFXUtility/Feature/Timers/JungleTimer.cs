@@ -70,7 +70,7 @@ namespace SFXUtility.Feature
 					Menu.Item(Name + "Enabled").GetValue<bool>();
 			}
 		}
-
+		
 		public override string Name
 		{
 			get { return "Jungle"; }
@@ -88,6 +88,8 @@ namespace SFXUtility.Feature
 				if (!Enabled) return;
 				foreach (var Texts in _DrawText)
 				{
+					if (IsFormat()) Texts.format = true;
+					else Texts.format = false;
 					foreach (JungleCamp jungleCamp in _jungleCamps.Where(camp => camp.NextRespawnTime > 0 && Texts.JungleCamp.Id == camp.Id))
 					{
 						Texts.Text.OnEndScene();
@@ -188,11 +190,13 @@ namespace SFXUtility.Feature
 					_timers = (o as Timers);
 
 					Menu = new Menu(Name, Name);
+										
+					Menu.AddItem(new MenuItem(Name + "Format", "Format Time mm:ss").SetValue(false));
 
 					Menu.AddItem(new MenuItem(Name + "Enabled", "Enabled").SetValue(true));
 
 					_timers.Menu.AddSubMenu(Menu);
-
+					
 					if (Utility.Map.GetMap().Type == Utility.Map.MapType.SummonersRift)
 					{
 						// Blue: Blue Buff
@@ -355,6 +359,11 @@ namespace SFXUtility.Feature
 		}
 
 		#endregion
+		
+		public bool IsFormat()
+		{
+			return Menu.Item(Name + "Format").GetValue<bool>();
+		}
 
 		private class JungleCamp
 		{
@@ -383,16 +392,23 @@ namespace SFXUtility.Feature
 			private int _layer;
 			public Render.Text Text { get; set; }
 			public JungleCamp JungleCamp;
+			public bool format;
 			public DrawText(JungleCamp pos)
 			{
 				Text = new Render.Text(Drawing.WorldToMinimap(pos.Position),"",15,SharpDX.Color.White)
 				{
 					VisibleCondition = sender => (pos.NextRespawnTime > 0 ),
-					TextUpdate = () => (pos.NextRespawnTime - (int)Game.ClockTime).ToString(CultureInfo.InvariantCulture),
+					TextUpdate = () => FormatTime(pos.NextRespawnTime - (int)Game.ClockTime),
 				};
 				JungleCamp = pos;
 				Text.Add(_layer);
 				_layer++;
+			}
+			private string FormatTime(int time)
+			{
+				var t = TimeSpan.FromSeconds(time);
+				if (format) return string.Format("{0:D1}:{1:D2}", t.Minutes, t.Seconds);					
+				else return time.ToString(CultureInfo.InvariantCulture);
 			}
 		}
 	}

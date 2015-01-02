@@ -204,7 +204,7 @@ namespace SFXUtility.Feature
 				if (!Enabled || ObjectManager.Player.InFountain() || ObjectManager.Player.IsDead ||
 				    ObjectManager.Player.HasBuff("Recall") || ObjectManager.Player.HasBuff("SummonerTeleport") ||
 				    ObjectManager.Player.HasBuff("RecallImproved") || Utility.CountEnemysInRange(1500) > 0)
-						return;
+						return;				
 				
 				if (Menu.Item(Name + "HealthPotion").GetValue<bool>())
 				{
