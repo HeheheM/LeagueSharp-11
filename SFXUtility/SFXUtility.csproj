@@ -58,10 +58,12 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Management" />
+    <Reference Include="System.Xml, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Class\Analytics.cs" />
     <Compile Include="Class\Chat.cs" />
+    <Compile Include="Class\Helper.cs" />
     <Compile Include="Class\HeroSpell.cs" />
     <Compile Include="Class\Item.cs" />
     <Compile Include="Class\Smite.cs" />

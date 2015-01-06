@@ -293,7 +293,7 @@ namespace SFXUtility.Feature
 							new JungleCamp("Sru_Crab", 180, new Vector3(4200.1f, 9900.7f, -63.1f), new[] { "Sru_Crab16.1.1" },16));
 
 					}
-					else if (Utility.Map.GetMap().Type == Utility.Map.MapType.TwistedTreeline)
+					if (Utility.Map.GetMap().Type == Utility.Map.MapType.TwistedTreeline)
 					{
 						// Blue: Wraiths
 						_jungleCamps.Add(
@@ -348,7 +348,7 @@ namespace SFXUtility.Feature
 						Drawing.OnEndScene += Drawing_OnEndScene;
 					}
 					else Game.PrintChat("Jungle Timer only supports SummonersRift and TwistedTreeline maps.");
-					Initialized = true;					
+					Initialized = true;
 				}
 			}
 			catch (Exception ex)
