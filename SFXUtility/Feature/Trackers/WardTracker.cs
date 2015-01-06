@@ -112,7 +112,7 @@ namespace SFXUtility.Feature
 				
 		private void OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
 		{
-			if (sender.IsAlly) return;
+			if (sender.IsAlly || !Enabled) return;
 			HidObject ho = HidObjects.IsSpellHidObj(args.SData.Name);
 			if (ho != null)
 			{
@@ -123,6 +123,7 @@ namespace SFXUtility.Feature
 		
 		private void OnDeleteObject(GameObject sender, EventArgs args)
 		{
+			if (!Enabled) return;
 			int i=0;
 			foreach (var lho in allObjects)
 			{
@@ -137,7 +138,7 @@ namespace SFXUtility.Feature
 		
 		private void OnCreateObject(GameObject sender, EventArgs args)
 		{
-			if (sender.Name.Contains("missile") || sender.Name.Contains("Minion") || sender.IsAlly) return;
+			if (sender.Name.Contains("missile") || sender.Name.Contains("Minion") || sender.IsAlly || !Enabled) return;
 				
 			Obj_AI_Base objis = ObjectManager.GetUnitByNetworkId<Obj_AI_Base>(sender.NetworkId);
 
@@ -158,6 +159,7 @@ namespace SFXUtility.Feature
 
 		private void OnDraw(EventArgs args)
 		{
+			if (!Enabled) return;
 			foreach (var lho in allObjects)
 			{
 				if (lho.Duration == -1 || (int)((lho.CreatedAt + lho.Duration + 1) - Game.Time) > 0)
