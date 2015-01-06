@@ -1,14 +1,6 @@
 ﻿
 namespace SFXUtility.Class
 {
-	using System;
-	using System.IO;
-	using System.Linq;
-	using System.Net;
-	using System.Reflection;
-	using System.Text.RegularExpressions;
-	using System.Xml;
-	using LeagueSharp.Common;
 	using SharpDX;
 	using SharpDX.Direct3D9;
 	
