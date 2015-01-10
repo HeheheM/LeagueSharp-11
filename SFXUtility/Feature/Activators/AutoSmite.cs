@@ -137,7 +137,7 @@ namespace SFXUtility.Feature
 
                     Menu.AddItem(new MenuItem(Name + "BigCamps", "Big Camps").SetValue(true));
                     Menu.AddItem(new MenuItem(Name + "SmallCamps", "Small Camps").SetValue(false));
-                    Menu.AddItem(new MenuItem(Name + "PacketCasting", "Packet Casting").SetValue(false));
+//                    Menu.AddItem(new MenuItem(Name + "PacketCasting", "Packet Casting").SetValue(false));
                     Menu.AddItem(
                         new MenuItem(Name + "Enabled", "Enabled").SetValue(new KeyBind('N', KeyBindType.Toggle, true)));
 
@@ -205,14 +205,14 @@ namespace SFXUtility.Feature
 
                 if (SmiteEnabled && Menu.Item(Name + "DrawingSmiteRange").GetValue<bool>())
                 {
-                    Utility.DrawCircle(ObjectManager.Player.Position, _smite.Range,
+                    Render.Circle.DrawCircle(ObjectManager.Player.Position, _smite.Range,
                         _smite.CanUseSpell() && _smite.IsInRange(_currentMinion)
                             ? Menu.Item(Name + "DrawingUseableColor").GetValue<Color>()
                             : Menu.Item(Name + "DrawingUnusableColor").GetValue<Color>(), circleThickness);
                 }
                 if (HeroSpellEnabled && Menu.Item(Name + "DrawingHeroSpellsRange").GetValue<bool>())
                 {
-                    Utility.DrawCircle(ObjectManager.Player.Position, _heroSpell.Range + _currentMinion.BoundingRadius,
+                    Render.Circle.DrawCircle(ObjectManager.Player.Position, _heroSpell.Range + _currentMinion.BoundingRadius,
                         _heroSpell.CanUseSpell() && _heroSpell.IsInRange(_currentMinion)
                             ? Menu.Item(Name + "DrawingUseableColor").GetValue<Color>()
                             : Menu.Item(Name + "DrawingUnusableColor").GetValue<Color>(), circleThickness);
@@ -287,7 +287,7 @@ namespace SFXUtility.Feature
                 {
                     if (HeroSpellEnabled && _heroSpell.CanUseSpell(_currentMinion))
                     {
-                        _heroSpell.CastSpell(_currentMinion, Menu.Item(Name + "PacketCasting").GetValue<bool>());
+                        _heroSpell.CastSpell(_currentMinion);
                     }
                     if (SmiteEnabled && _smite.CanUseSpell(_currentMinion))
                     {

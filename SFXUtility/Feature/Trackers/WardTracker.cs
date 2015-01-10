@@ -164,7 +164,7 @@ namespace SFXUtility.Feature
 			{
 				if (lho.Duration == -1 || (int)((lho.CreatedAt + lho.Duration + 1) - Game.Time) > 0)
 				{
-					Utility.DrawCircle(lho.Position, 50, lho.ObjColor);
+					Render.Circle.DrawCircle(lho.Position, 50, lho.ObjColor);
 					if (lho.Duration > 0)
 					{
 						Vector2 locOnScreen = Drawing.WorldToScreen(lho.Position);

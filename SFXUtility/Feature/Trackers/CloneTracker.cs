@@ -90,7 +90,7 @@ namespace SFXUtility.Feature
                             .Where(hero => hero.IsValid && hero.IsEnemy && !hero.IsDead && hero.IsVisible)
                             .Where(hero => _cloneHeroes.Contains(hero.ChampionName)))
                 {
-                    Utility.DrawCircle(hero.ServerPosition, hero.BoundingRadius + radius, circleColor);
+                    Render.Circle.DrawCircle(hero.ServerPosition, hero.BoundingRadius + radius, circleColor);
                 }
             }
             catch (Exception ex)

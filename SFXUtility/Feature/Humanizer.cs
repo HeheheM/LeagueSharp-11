@@ -88,13 +88,13 @@ namespace SFXUtility.Feature
                 eMenuItem.ValueChanged +=
                     delegate(object sender, OnValueChangeEventArgs eventArgs)
                     {
-                        SpellHumanizer.Enabled = eventArgs.GetNewValue<bool>();
+                        Class.SpellHumanizer.Enabled = eventArgs.GetNewValue<bool>();
                     };
 
                 BaseMenu.AddSubMenu(Menu);
 
                 Game.OnGameSendPacket += OnGameSendPacket;
-
+                
                 Initialized = true;
             }
             catch (Exception ex)
