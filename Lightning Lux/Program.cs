@@ -95,12 +95,13 @@ namespace LightningLux
 			Config.SubMenu("ExtraSettings").AddItem(new MenuItem("UseQE", "Only E if Target trapped").SetValue(false));
 			Config.SubMenu("ExtraSettings").AddItem(new MenuItem("AutoE2", "Auto pop E").SetValue(true));
 			Config.SubMenu("ExtraSettings").AddItem(new MenuItem("UseQGap", "Q on GapCloser").SetValue(true));
-			Config.SubMenu("ExtraSettings").AddItem(new MenuItem("YasuoWall", "Don't use skillshots on Yasuo's Wall").SetValue(true));
+			Config.SubMenu("ExtraSettings").AddItem(new MenuItem("TargetInvul", "Don't use skillshots on Invul target").SetValue(false));
+			Config.SubMenu("ExtraSettings").AddItem(new MenuItem("YasuoWall", "Don't use skillshots on Yasuo's Wall").SetValue(false));
 			Config.SubMenu("ExtraSettings").AddItem(new MenuItem("HitChance", "HitChance").SetValue(new StringList(new[] {"Low","Medium","High","Very High"},2)));
-			Config.SubMenu("ExtraSettings").AddItem(new MenuItem("UsePacket", "Use Packet Cast").SetValue(true));
+			Config.SubMenu("ExtraSettings").AddItem(new MenuItem("UsePacket", "Use Packet Cast").SetValue(false));
 			
 			Config.AddSubMenu(new Menu("UltSettings", "UltSettings"));
-			Config.SubMenu("UltSettings").AddItem(new MenuItem("RHit", "Auto R if hit").SetValue(new StringList(new[] {"None","2 Target","3 Target","4 Target","5 Target"},1)));
+			Config.SubMenu("UltSettings").AddItem(new MenuItem("RHit", "Auto R if hit").SetValue(new StringList(new[] {"None","2 Target","3 Target","4 Target","5 Target"},0)));
 			Config.SubMenu("UltSettings").AddItem(new MenuItem("RTrap", "Auto R if trapped").SetValue(false));
 			
 			Config.AddSubMenu(new Menu("Drawings", "Drawings"));
@@ -277,19 +278,19 @@ namespace LightningLux
 		{
 			if (GetCircle("QRange").Active && !Player.IsDead)
 			{
-				Utility.DrawCircle(Player.Position, Q.Range, GetCircle("QRange").Color);
+				Render.Circle.DrawCircle(Player.Position, Q.Range, GetCircle("QRange").Color);
 			}
 			if (GetCircle("WRange").Active && !Player.IsDead)
 			{
-				Utility.DrawCircle(Player.Position, W.Range, GetCircle("WRange").Color);
+				Render.Circle.DrawCircle(Player.Position, W.Range, GetCircle("WRange").Color);
 			}
 			if (GetCircle("ERange").Active && !Player.IsDead)
 			{
-				Utility.DrawCircle(Player.Position, E.Range, GetCircle("ERange").Color);
+				Render.Circle.DrawCircle(Player.Position, E.Range, GetCircle("ERange").Color);
 			}
 			if (GetActive("JungSteal") && !Player.IsDead)
 			{
-				Utility.DrawCircle(Game.CursorPos, 900, Color.White);
+				Render.Circle.DrawCircle(Game.CursorPos, 900, Color.White);
 			}
 		}
 		
@@ -303,7 +304,7 @@ namespace LightningLux
 		{
 			if (Player.HasBuff("Recall") || Player.IsWindingUp) return;
 			if (GetBool("UseQGap") && Q.IsReady() && GetDistanceSqr(Player,gapcloser.Sender) <= Q.Range * Q.Range)
-				CastQ((Obj_AI_Hero)gapcloser.Sender);
+				Q.CastIfHitchanceEquals(gapcloser.Sender, HitChance.High,GetBool("UsePacket"));
 		}
 		
 		private static void AutoShield()
@@ -324,11 +325,11 @@ namespace LightningLux
 		private static double ComboDmg(Obj_AI_Hero target)
 		{
 			double damage = 0;
-			if (Q.IsReady() && Q.InRange(target.Position))
+			if (Q.IsReady() && Q.IsInRange(target.Position,Q.Range))
 				damage += Player.GetSpellDamage(target,SpellSlot.Q);
-			if (E.IsReady() && E.InRange(target.Position))
+			if (E.IsReady() && E.IsInRange(target.Position,E.Range))
 				damage += Player.GetSpellDamage(target,SpellSlot.E);
-			if (R.IsReady() && R.InRange(target.Position))
+			if (R.IsReady() && R.IsInRange(target.Position,R.Range))
 				damage += Player.GetSpellDamage(target,SpellSlot.R);
 			if ((Items.HasItem(3128) && Items.CanUseItem(3128)) || (Items.HasItem(3188) && Items.CanUseItem(3188)) && GetDistanceSqr(Player,target) <= 750 * 750)
 				damage += damage * 1.2;
@@ -343,9 +344,20 @@ namespace LightningLux
 		
 		private static bool IsInvul(Obj_AI_Hero enemy)
 		{
-			if (enemy.HasBuff("JudicatorIntervention") || enemy.HasBuff("Undying Rage"))
+			if ((enemy.HasBuff("JudicatorIntervention") || enemy.HasBuff("Undying Rage")) && GetBool("TargetInvul"))
 				return true;
 			return false;
+		}
+		
+		public static bool IsFacing(Obj_AI_Base source, Obj_AI_Base target)
+		{
+			if (source == null || target == null)
+			{
+				return false;
+			}
+
+			const float angle = 90;
+			return source.Direction.To2D().AngleBetween((target.Position - source.Position).To2D()) < angle;
 		}
 		
 		private static void UseCombo()
@@ -353,27 +365,21 @@ namespace LightningLux
 			if (Target == null) return;
 			
 			bool AllSkills = false;
-						
-			if (ComboDmg(Target) >= Target.Health && Target.Distance(Player) <= 950 ) AllSkills = true;
 			
-			if (IsInvul(Target)) 
-			{
-				CastQ(Target);
-				return;
-			}
+			if (ComboDmg(Target) >= Target.Health && Target.Distance(Player) <= 950 ) AllSkills = true;
 			
 			if (GetBool("UseItems") && AllSkills && GetDistanceSqr(Player,Target) <= 750 * 750 && NotYasuoWall(Target))
 			{
 				if (Items.CanUseItem(3128)) Items.UseItem(3128,Target);
 				if (Items.CanUseItem(3188)) Items.UseItem(3188,Target);
 			}
-			if (GetBool("UseQ") && Q.IsReady() && GetDistanceSqr(Player,Target) <= Q.Range * Q.Range && NotYasuoWall(Target) && !IsInvul(Target))
+			if (GetBool("UseQ") && Q.IsReady() && GetDistanceSqr(Player,Target) <= Q.Range * Q.Range && NotYasuoWall(Target))
 			{
-				CastQ(Target);
+				Q.CastIfHitchanceEquals(Target, HitC,GetBool("UsePacket"));
 				if (Target.IsValidTarget(550) && Target.HasBuff("luxilluminatingfraulein"))
 					Player.IssueOrder(GameObjectOrder.AttackUnit, Target);
 			}
-			if (GetBool("UseW")  && W.IsReady() && Utility.IsFacing(Player,Target,450) && Player.Distance(Target) <= 450)
+			if (GetBool("UseW")  && W.IsReady() && IsFacing(Player,Target) && Player.Distance(Target) <= 450)
 			{
 				W.Cast(Target,GetBool("UsePacket") );
 			}
@@ -399,7 +405,7 @@ namespace LightningLux
 			{
 				if (Target.Health <= Damage.GetAutoAttackDamage(Player,Target,true) && Player.Distance(Target) < 550)
 					Player.IssueOrder(GameObjectOrder.AttackUnit, Target);
-				else R.CastIfHitchanceEquals(Target,HitChance.High ,GetBool("UsePacket"));
+				else R.CastIfHitchanceEquals(Target,HitC ,GetBool("UsePacket"));
 			}
 			if (GetBool("UseIgnite") && (IgniteKillable(Target) || AllSkills) && CanIgnite())
 			{
@@ -413,14 +419,10 @@ namespace LightningLux
 		private static void Harass()
 		{
 			if (Target == null) return;
-			if (IsInvul(Target)) 
+
+			if (GetBool("HQ") && Q.IsReady() && GetDistanceSqr(Player,Target) <= Q.Range * Q.Range && NotYasuoWall(Target))
 			{
-				CastQ(Target);
-				return;
-			}
-			if (GetBool("HQ") && Q.IsReady() && GetDistanceSqr(Player,Target) <= Q.Range * Q.Range && NotYasuoWall(Target) && !IsInvul(Target))
-			{
-				CastQ(Target);
+				Q.CastIfHitchanceEquals(Target, HitC,GetBool("UsePacket"));
 				if (Target.IsValidTarget(550) && Target.HasBuff("luxilluminatingfraulein"))
 					Player.IssueOrder(GameObjectOrder.AttackUnit, Target);
 			}
@@ -447,11 +449,11 @@ namespace LightningLux
 		private static double CalculateDmg(Obj_AI_Base target)
 		{
 			double damage = 0;
-			if (Q.IsReady() && Q.InRange(target.Position))
+			if (Q.IsReady() && Q.IsInRange(target.Position,Q.Range))
 				damage += Player.GetSpellDamage(target,SpellSlot.Q);
-			if (E.IsReady() && E.InRange(target.Position))
+			if (E.IsReady() && E.IsInRange(target.Position,E.Range))
 				damage += Player.GetSpellDamage(target,SpellSlot.E);
-			if (R.IsReady() && R.InRange(target.Position))
+			if (R.IsReady() && R.IsInRange(target.Position,R.Range))
 				damage += Player.GetSpellDamage(target,SpellSlot.R);
 			return damage;
 		}
@@ -485,12 +487,12 @@ namespace LightningLux
 			{
 				foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsValidTarget(R.Range) && hero.IsEnemy && !hero.IsDead))
 				{
-					if (IsInvul(hero) && GetDistanceSqr(Player,hero) <= Q.Range * Q.Range) Q.CastIfHitchanceEquals(hero, HitC ,GetBool("UsePacket"));
+					if (IsInvul(hero) && GetDistanceSqr(Player,hero) <= Q.Range * Q.Range) Q.CastIfHitchanceEquals(hero, HitChance.High ,GetBool("UsePacket"));
 					
 					if (NotYasuoWall(hero) && !IsInvul(hero))
 					{
 						if (GetBool("KUseQ") && Q.IsReady() && GetDistanceSqr(Player,hero) <= Q.Range * Q.Range && Q.IsKillable(hero))
-							CastQ(hero);
+							Q.CastIfHitchanceEquals(hero, HitChance.High,GetBool("UsePacket"));
 						else if (GetBool("KUseE") && E.IsReady() && GetDistanceSqr(Player,hero) <= E.Range * E.Range && E.IsKillable(hero) )
 						{
 							E.CastIfHitchanceEquals(hero, HitChance.High ,GetBool("UsePacket"));
@@ -516,17 +518,11 @@ namespace LightningLux
 			}
 		}
 		
-		private static void CastQ(Obj_AI_Hero enemy)
-		{
-			var pos = Q.GetPrediction(enemy);
-			if (pos.Hitchance >= HitC && pos.CollisionObjects.Count <= 1) Q.Cast(pos.CastPosition,GetBool("UsePacket"));
-		}
-		
 		private static void CastE2()
 		{
 			if (EObject == null) return;
 			foreach (Obj_AI_Hero enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget() && enemy.IsEnemy &&
-			                                                                       Vector3.Distance(EObject.Position, enemy.Position) <= E.Width+15))
+			                                                                     Vector3.Distance(EObject.Position, enemy.Position) <= E.Width+15))
 			{
 				if (!IsInvul(enemy))
 				{
