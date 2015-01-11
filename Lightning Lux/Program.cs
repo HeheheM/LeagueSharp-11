@@ -6,6 +6,7 @@ using System.Linq;
 using SharpDX;
 using LeagueSharp;
 using LeagueSharp.Common;
+using xSLx_Orbwalker;
 #endregion
 
 namespace LightningLux
@@ -54,8 +55,12 @@ namespace LightningLux
 			TargetSelector.AddToMenu(targetSelectorMenu);
 			Config.AddSubMenu(targetSelectorMenu);
 			
-			Config.AddSubMenu(new Menu("Orbwalker", "Orbwalker"));
-			var orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalker"));
+//			Config.AddSubMenu(new Menu("Orbwalker", "Orbwalker"));
+//			var orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalker"));
+			
+			var Menu_Orbwalker = new Menu("Orbwalker", "Orbwalker");
+			xSLxOrbwalker.AddToMenu(Menu_Orbwalker);
+			Config.AddSubMenu(Menu_Orbwalker);
 			
 			Config.AddSubMenu(new Menu("Combo", "Combo"));
 			Config.SubMenu("Combo").AddItem(new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind(32, KeyBindType.Press)));
@@ -113,7 +118,8 @@ namespace LightningLux
 			Game.PrintChat("Lightning Lux loaded!");
 
 			Game.OnGameUpdate += Game_OnGameUpdate;
-			Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
+			xSLxOrbwalker.BeforeAttack += Orbwalking_BeforeAttack;
+//			Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
 			Drawing.OnDraw += Drawing_OnDraw;
 			AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
 			Obj_AI_Base.OnProcessSpellCast += Obj_AI_Hero_OnProcessSpellCast;
@@ -294,7 +300,7 @@ namespace LightningLux
 			}
 		}
 		
-		private static void Orbwalking_BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
+		private static void Orbwalking_BeforeAttack(xSLxOrbwalker.BeforeAttackEventArgs args)
 		{
 			if (GetActive("ComboActive"))
 				args.Process = (!Q.IsReady() || !E.IsReady() || Player.Distance(args.Target) >= 550);
@@ -309,7 +315,8 @@ namespace LightningLux
 		
 		private static void AutoShield()
 		{
-			if (Player.Mana/Player.MaxMana*100 >= GetSlider("MP")) W.CastIfHitchanceEquals(GrabAlly(), HitC ,GetBool("UsePacket"));
+			if (Player.ManaPercentage() >= GetSlider("MP") && W.IsReady() && GrabAlly() != null)
+				W.CastIfHitchanceEquals(GrabAlly(), HitC ,GetBool("UsePacket"));
 		}
 		
 		private static bool IgniteKillable(Obj_AI_Base target)
@@ -381,7 +388,7 @@ namespace LightningLux
 			}
 			if (GetBool("UseW")  && W.IsReady() && IsFacing(Player,Target) && Player.Distance(Target) <= 450)
 			{
-				W.Cast(Target,GetBool("UsePacket") );
+				W.Cast(Target,GetBool("UsePacket"));
 			}
 			if (GetBool("UseE")  && E.IsReady() && GetDistanceSqr(Player,Target) <= E.Range * E.Range && NotYasuoWall(Target) && !IsInvul(Target))
 			{
