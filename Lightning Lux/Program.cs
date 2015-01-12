@@ -156,14 +156,17 @@ namespace LightningLux
 		{
 			KillSteal();
 			
-			if (GetBool("WAllies")) AutoShield();
+			if (GetBool("WAllies") && W.IsReady()) AutoShield();
 			if (GetBool("AutoE2")) CastE2();
-			if (GetBool("RTrap")) RTrapped();
+			if (GetBool("RTrap") && R.IsReady()) RTrapped();
 			
-			if (GetSelected("RHit") == 1) RHit(2);
-			else if (GetSelected("RHit") == 2) RHit(3);
-			else if (GetSelected("RHit") == 3) RHit(4);
-			else if (GetSelected("RHit") == 4) RHit(5);
+			if (R.IsReady())
+			{
+				if (GetSelected("RHit") == 1) RHit(2);
+				else if (GetSelected("RHit") == 2) RHit(3);
+				else if (GetSelected("RHit") == 3) RHit(4);
+				else if (GetSelected("RHit") == 4) RHit(5);
+			}
 			
 			Target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
 			
@@ -303,7 +306,7 @@ namespace LightningLux
 		private static void Orbwalking_BeforeAttack(xSLxOrbwalker.BeforeAttackEventArgs args)
 		{
 			if (GetActive("ComboActive"))
-				args.Process = (!Q.IsReady() || !E.IsReady() || Player.Distance(args.Target) >= 550);
+				args.Process = (!Q.IsReady() || !W.IsReady() || !E.IsReady() || Player.Distance(args.Target) >= 550);
 		}
 		
 		private static void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
@@ -315,7 +318,7 @@ namespace LightningLux
 		
 		private static void AutoShield()
 		{
-			if (Player.ManaPercentage() >= GetSlider("MP") && W.IsReady() && GrabAlly() != null)
+			if (Player.ManaPercentage() >= GetSlider("MP") && GrabAlly() != null)
 				W.CastIfHitchanceEquals(GrabAlly(), HitC ,GetBool("UsePacket"));
 		}
 		
@@ -386,7 +389,7 @@ namespace LightningLux
 				if (Target.IsValidTarget(550) && Target.HasBuff("luxilluminatingfraulein"))
 					Player.IssueOrder(GameObjectOrder.AttackUnit, Target);
 			}
-			if (GetBool("UseW")  && W.IsReady() && IsFacing(Player,Target) && Player.Distance(Target) <= 450)
+			if (GetBool("UseW")  && W.IsReady() && IsFacing(Player,Target) && Player.Distance(Target) <= 550)
 			{
 				W.Cast(Target,GetBool("UsePacket"));
 			}
@@ -412,7 +415,14 @@ namespace LightningLux
 			{
 				if (Target.Health <= Damage.GetAutoAttackDamage(Player,Target,true) && Player.Distance(Target) < 550)
 					Player.IssueOrder(GameObjectOrder.AttackUnit, Target);
-				else R.CastIfHitchanceEquals(Target,HitC ,GetBool("UsePacket"));
+				else
+				{
+					if (Target.HasBuffOfType(BuffType.Slow) || Target.HasBuffOfType(BuffType.Stun) ||
+					    Target.HasBuffOfType(BuffType.Snare) || Target.HasBuffOfType(BuffType.Taunt))
+						R.Cast(Target,GetBool("UsePacket"));
+					else
+						R.CastIfHitchanceEquals(Target,HitChance.VeryHigh ,GetBool("UsePacket"));
+				}
 			}
 			if (GetBool("UseIgnite") && (IgniteKillable(Target) || AllSkills) && CanIgnite())
 			{
@@ -509,7 +519,14 @@ namespace LightningLux
 						{
 							if (hero.Health <= Damage.GetAutoAttackDamage(Player,hero,true) && Player.Distance(hero) < 550)
 								Player.IssueOrder(GameObjectOrder.AttackUnit, hero);
-							else R.CastIfHitchanceEquals(hero,HitChance.High ,GetBool("UsePacket"));
+							else
+							{
+								if (Target.HasBuffOfType(BuffType.Slow) || Target.HasBuffOfType(BuffType.Stun) ||
+								    Target.HasBuffOfType(BuffType.Snare) || Target.HasBuffOfType(BuffType.Taunt))
+									R.Cast(hero,GetBool("UsePacket"));
+								else
+									R.CastIfHitchanceEquals(hero,HitChance.VeryHigh ,GetBool("UsePacket"));
+							}
 						}
 						else if (GetBool("KIgnite") && IgniteKillable(hero) && CanIgnite())
 						{

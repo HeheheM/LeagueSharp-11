@@ -111,6 +111,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Resources\LP\LP_Kalista.png" />
+    <None Include="Resources\LP\LP_RekSai.png" />
     <None Include="SFXUtility.licenseheader" />
   </ItemGroup>
   <ItemGroup>
