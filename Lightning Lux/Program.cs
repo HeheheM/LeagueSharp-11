@@ -91,9 +91,12 @@ namespace LightningLux
 			Config.SubMenu("KillSteal").AddItem(new MenuItem("KIgnite", "Use Ignite").SetValue(true));
 			
 			Config.AddSubMenu(new Menu("AutoShield", "AutoShield"));
-			Config.SubMenu("AutoShield").AddItem(new MenuItem("WAllies", "Auto W for Allies").SetValue(true));
 			Config.SubMenu("AutoShield").AddItem(new MenuItem("AutoW", "Auto W when Lux is targeted").SetValue(true));
-			Config.SubMenu("AutoShield").AddItem(new MenuItem("HP", "Allies HP %").SetValue(new Slider(60,100,0)));
+			Config.SubMenu("AutoShield").AddItem(new MenuItem("WAllies", "Auto W for Allies").SetValue(true));
+			Config.SubMenu("AutoShield").AddItem(new MenuItem("HP", "W for Allies if HP < %").SetValue(new Slider(60,100,0)));
+			Config.SubMenu("AutoShield").AddItem(new MenuItem("Mikael", "Use Mikael").SetValue(false));
+			Config.SubMenu("AutoShield").AddItem(new MenuItem("Iron", "Use Iron Solari").SetValue(false));
+			Config.SubMenu("AutoShield").AddItem(new MenuItem("ItemHP", "Items for Allies if HP < %").SetValue(new Slider(15,100,0)));
 			Config.SubMenu("AutoShield").AddItem(new MenuItem("MP", "My MP %").SetValue(new Slider(30,100,0)));
 			
 			Config.AddSubMenu(new Menu("ExtraSettings", "ExtraSettings"));
@@ -204,10 +207,10 @@ namespace LightningLux
 				YasuoWall = null;
 		}
 		
-		private static Obj_AI_Hero GrabAlly()
+		private static Obj_AI_Hero GrabAlly(string s)
 		{
 			Obj_AI_Hero Ally = null;
-			foreach (var hero in from hero in ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsValidTarget(W.Range) && hero.IsAlly ) let heroPercent = hero.Health/hero.MaxHealth*100 let shieldPercent = GetSlider("HP") where heroPercent <= shieldPercent select hero)
+			foreach (var hero in from hero in ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsValidTarget(W.Range) && hero.IsAlly ) let heroPercent = hero.Health/hero.MaxHealth*100 let shieldPercent = GetSlider(s) where heroPercent <= shieldPercent select hero)
 			{
 				Ally = hero;
 				break;
@@ -263,8 +266,8 @@ namespace LightningLux
 			{
 				if (GetBool("FW") && W.IsReady() && GetActive("FarmActive") && args.Target.Name == Player.Name && Player.Mana/Player.MaxMana*100 >= GetSlider("MP") )
 				{
-					if (GrabAlly() == null) W.Cast(sender,GetBool("UsePacket"));
-					else W.CastIfHitchanceEquals(GrabAlly(), HitC ,GetBool("UsePacket"));
+					if (GrabAlly("HP") == null) W.Cast(sender,GetBool("UsePacket"));
+					else W.CastIfHitchanceEquals(GrabAlly("HP"), HitC ,GetBool("UsePacket"));
 				}
 				
 			}
@@ -272,14 +275,43 @@ namespace LightningLux
 			{
 				if ( (args.SData.Name != null && IsOnTheLine(Player.Position,args.Start,args.End)) || (args.Target == Player && Player.Distance(sender) <= 450) || args.Target == Player && Utility.UnderTurret(Player,true))
 				{
-					if (GrabAlly() == null) W.Cast(sender,GetBool("UsePacket"));
-					else W.CastIfHitchanceEquals(GrabAlly(), HitC ,GetBool("UsePacket"));
+					if (GrabAlly("HP") == null) W.Cast(sender,GetBool("UsePacket"));
+					else W.CastIfHitchanceEquals(GrabAlly("HP"), HitC ,GetBool("UsePacket"));
 				}
 			}
 			if (sender.IsValid && sender.IsEnemy && args.SData.Name == "YasuoWMovingWall")
 			{
 				WallCastT = Environment.TickCount;
 				YasuoWallCastedPos = sender.ServerPosition.To2D();
+			}
+			if (!GetBool("Mikeal") && !GetBool("Iron")) return;
+			Items.Item Mikael = new Items.Item(3222,750);;
+			Items.Item Iron = new Items.Item(3190,600);;
+			if (!Mikael.IsReady() || !Iron.IsReady()) return;
+			if (sender.IsValid && sender.IsEnemy)
+			{
+				var allies = GrabAlly("ItemHP");
+				if (allies != null && args.Target == allies)
+				{
+					if (Utility.CountEnemiesInRange(allies,1200) > 0 && !Utility.InFountain(allies))
+					{
+						if (Mikael.IsReady() && Mikael.IsInRange(allies)) Mikael.Cast(allies);
+						if (Iron.IsReady() && Iron.IsInRange(allies)) Iron.Cast();
+					}
+					else if (sender.Type == GameObjectType.obj_AI_Turret && Utility.UnderTurret(allies,true))
+					{
+						if (Mikael.IsReady() && Mikael.IsInRange(allies)) Mikael.Cast(allies);
+						if (Iron.IsReady() && Iron.IsInRange(allies)) Iron.Cast();
+					}
+				}
+				else if (allies == null && args.Target == Player && !Utility.InFountain(Player))
+				{
+					if (Player.HealthPercentage() <= GetSlider("ItemHP") && Utility.CountEnemiesInRange(Player,1200) > 0)
+					{
+						if (Mikael.IsReady()) Mikael.Cast(Player);
+						if (Iron.IsReady()) Iron.Cast();
+					}
+				}
 			}
 		}
 		
@@ -318,10 +350,10 @@ namespace LightningLux
 		
 		private static void AutoShield()
 		{
-			if (Player.ManaPercentage() >= GetSlider("MP") && GrabAlly() != null)
-				W.CastIfHitchanceEquals(GrabAlly(), HitC ,GetBool("UsePacket"));
+			if (Player.ManaPercentage() >= GetSlider("MP") && GrabAlly("HP") != null)
+				W.CastIfHitchanceEquals(GrabAlly("HP"), HitC ,GetBool("UsePacket"));
 		}
-		
+				
 		private static bool IgniteKillable(Obj_AI_Base target)
 		{
 			return Player.GetSummonerSpellDamage(target,Damage.SummonerSpell.Ignite) >= target.Health;
