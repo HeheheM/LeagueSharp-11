@@ -3,14 +3,13 @@ using System;
 using System.Globalization;
 using System.Collections.Generic;
 using System.Linq;
-using Color = System.Drawing.Color;
 using SharpDX;
 using LeagueSharp;
 using LeagueSharp.Common;
 #endregion
 
 namespace JungleTimer
-{
+{	
 	internal class Program
 	{
 		private static readonly List<JungleCamp> _jungleCamps = new List<JungleCamp>();
@@ -22,7 +21,7 @@ namespace JungleTimer
 			CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
 		}
 		
-		private static void Initialize()
+		private static void Game_OnGameLoad(EventArgs args)
 		{
 			if (Utility.Map.GetMap().Type == Utility.Map.MapType.SummonersRift)
 			{
@@ -171,16 +170,11 @@ namespace JungleTimer
 					DrawText pos = new DrawText(camp);
 					_DrawText.Add(pos);
 				}
-				Game.PrintChat("JungleTimer loaded!");
 				Game.OnGameUpdate += Game_OnGameUpdate;
 				Drawing.OnEndScene += Drawing_OnEndScene;
+				Game.PrintChat("JungleTimer loaded!");
 			}
 			else Game.PrintChat("Jungle Timer only supports SummonersRift and TwistedTreeline maps.");
-		}
-		
-		private static void Game_OnGameLoad(EventArgs args)
-		{
-			Initialize();
 		}
 		
 		private static void Game_OnGameUpdate(EventArgs args)
@@ -236,47 +230,6 @@ namespace JungleTimer
 				{
 					Texts.Text.OnEndScene();
 				}
-			}
-		}
-		
-		
-		private class JungleCamp
-		{
-			public String Name;
-			public int NextRespawnTime;
-			public int RespawnTime;
-			public bool IsDead;
-			public bool Visibled;
-			public Vector3 Position;
-			public string[] Names;
-			public readonly int Id;
-			public JungleCamp(String name, int respawnTime, Vector3 position, string[] names, int id)
-			{
-				Name = name;
-				RespawnTime = respawnTime;
-				Position = position;
-				Names = names;
-				IsDead = false;
-				Visibled = false;
-				Id = id;
-			}
-		}
-		
-		private class DrawText
-		{
-			private static int _layer;
-			public Render.Text Text { get; set; }
-			public JungleCamp JungleCamp;
-			public DrawText(JungleCamp pos)
-			{
-				Text = new Render.Text(Drawing.WorldToMinimap(pos.Position),"",15,SharpDX.Color.White)
-				{
-					VisibleCondition = sender => (pos.NextRespawnTime > 0 ),
-					TextUpdate = () => (pos.NextRespawnTime - (int)Game.ClockTime).ToString(CultureInfo.InvariantCulture),
-				};
-				JungleCamp = pos;
-				Text.Add(_layer);
-				_layer++;
 			}
 		}
 	}

@@ -270,8 +270,8 @@ namespace WhereDidHeGo
 					    hero.ChampionName.Contains("MonkeyKing") ||
 					    hero.ChampionName.Contains("Yorick"))
 					{
-						Utility.DrawCircle(hero.ServerPosition, 100, Color.Red);
-						Utility.DrawCircle(hero.ServerPosition, 110, Color.Red);
+						Render.Circle.DrawCircle(hero.ServerPosition, 100, Color.Red);
+						Render.Circle.DrawCircle(hero.ServerPosition, 110, Color.Red);
 					}
 				}
 			}
@@ -284,10 +284,10 @@ namespace WhereDidHeGo
 					Vector2 lineEndPos = Drawing.WorldToScreen(Spells[i].EndPos);
 					float size = 100;
 					if (Spells[i].Radius > 0 && ((float)Environment.TickCount/1000) < Spells[i].TimeCasted + Spells[i].Delay) size = Spells[i].Radius;
-					if (Spells[i].OutOfBush) Utility.DrawCircle(Spells[i].EndPos, Spells[i].MaxRange, Color.Red);
+					if (Spells[i].OutOfBush) Render.Circle.DrawCircle(Spells[i].EndPos, Spells[i].MaxRange, Color.Red);
 					else
 					{
-						Utility.DrawCircle(Spells[i].EndPos, size, Color.White);
+						Render.Circle.DrawCircle(Spells[i].EndPos, size, Color.White);
 						Drawing.DrawLine(lineStartPos,lineEndPos, 2.0f, Color.Blue);
 					}
 					int offset = 30;

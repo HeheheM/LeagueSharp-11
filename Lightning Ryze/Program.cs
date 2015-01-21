@@ -187,7 +187,7 @@ namespace LightningRyze
 				else if (args.SData.Name.ToLower() == "summonerflash") LastFlashTime = Game.Time;
 				if (GetActive("tearStack"))
 				{
-					var spellSlot = Player.GetSpellSlot(args.SData.Name, false);
+					var spellSlot = Player.GetSpellSlot(args.SData.Name);
 					var target = ObjectManager.GetUnitByNetworkId<Obj_AI_Base>(args.Target.NetworkId);
 					var distance = Player.ServerPosition.Distance(target.ServerPosition);
 					var delay = 1000 * (distance / args.SData.MissileSpeed);
@@ -212,8 +212,8 @@ namespace LightningRyze
 		
 		private static void Drawing_OnDraw(EventArgs args)
 		{
-			if (GetCircle("QRange").Active && !Player.IsDead) Utility.DrawCircle(Player.Position, Q.Range, GetCircle("QRange").Color);
-			if (GetCircle("WERange").Active && !Player.IsDead) Utility.DrawCircle(Player.Position, W.Range, GetCircle("WERange").Color);
+			if (GetCircle("QRange").Active && !Player.IsDead) Render.Circle.DrawCircle(Player.Position, Q.Range, GetCircle("QRange").Color);
+			if (GetCircle("WERange").Active && !Player.IsDead) Render.Circle.DrawCircle(Player.Position, W.Range, GetCircle("WERange").Color);
 		}
 		
 		private static void Orbwalking_BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
@@ -301,7 +301,7 @@ namespace LightningRyze
 				if (Q.IsKillable(Target) && Q.IsReady()) Q.CastOnUnit(Target,GetBool("UsePacket"));
 				else if (E.IsKillable(Target) && E.IsReady()) E.CastOnUnit(Target,GetBool("UsePacket"));
 				else if (W.IsKillable(Target) && W.IsReady()) W.CastOnUnit(Target,GetBool("UsePacket"));
-				else if (GetDistance(Target) >= 575 && !Utility.IsBothFacing(Player,Target,575) && W.IsReady()) W.CastOnUnit(Target,GetBool("UsePacket"));
+				else if (GetDistance(Target) >= 575 && !IsBothFacing(Player,Target) && W.IsReady()) W.CastOnUnit(Target,GetBool("UsePacket"));
 				else
 				{
 					if (Q.IsReady() && W.IsReady() && E.IsReady() && GetComboDamage(Target) >= (double)Target.Health)
@@ -313,7 +313,7 @@ namespace LightningRyze
 					}
 					else if (Math.Abs(Player.PercentCooldownMod) >= 0.2)
 					{
-						if (Target.CountEnemysInRange(300) > 1)
+						if (Utility.CountEnemiesInRange(Target,300) > 1)
 						{
 							if (LastCast == "Q")
 							{
@@ -364,7 +364,7 @@ namespace LightningRyze
 				if (Q.IsKillable(Target) && Q.IsReady()) Q.CastOnUnit(Target,GetBool("UsePacket"));
 				else if (E.IsKillable(Target) && E.IsReady()) E.CastOnUnit(Target,GetBool("UsePacket"));
 				else if (W.IsKillable(Target) && W.IsReady()) W.CastOnUnit(Target,GetBool("UsePacket"));
-				else if (GetDistance(Target) >= 575 && !Utility.IsBothFacing(Player,Target,575) && W.IsReady()) W.CastOnUnit(Target,GetBool("UsePacket"));
+				else if (GetDistance(Target) >= 575 && !IsBothFacing(Player,Target) && W.IsReady()) W.CastOnUnit(Target,GetBool("UsePacket"));
 				else
 				{
 					if (Q.IsReady()) Q.CastOnUnit(Target ,GetBool("UsePacket"));
@@ -391,10 +391,10 @@ namespace LightningRyze
 				if (Q.IsKillable(Target) && Q.IsReady()) Q.CastOnUnit(Target,GetBool("UsePacket"));
 				else if (E.IsKillable(Target) && E.IsReady()) E.CastOnUnit(Target,GetBool("UsePacket"));
 				else if (W.IsKillable(Target) && W.IsReady()) W.CastOnUnit(Target,GetBool("UsePacket"));
-				else if (GetDistance(Target) >= 575 && !Utility.IsBothFacing(Player,Target,575) && W.IsReady()) W.CastOnUnit(Target,GetBool("UsePacket"));
+				else if (GetDistance(Target) >= 575 && !IsBothFacing(Player,Target) && W.IsReady()) W.CastOnUnit(Target,GetBool("UsePacket"));
 				else
 				{
-					if (Target.CountEnemysInRange(300) > 1)
+					if (Utility.CountEnemiesInRange(Target,300) > 1)
 					{
 						if (LastCast == "Q")
 						{
@@ -511,6 +511,15 @@ namespace LightningRyze
 					Q.CastOnUnit(enemy,GetBool("UsePacket"));
 				}
 			}
+		}
+		private static bool IsFacing(Obj_AI_Base source, Obj_AI_Base target)
+		{
+			const float angle = 90;
+			return source.Direction.To2D().AngleBetween((target.Position - source.Position).To2D()) < angle;
+		}
+		private static bool IsBothFacing(Obj_AI_Base source, Obj_AI_Base target)
+		{
+			return IsFacing(source,target) && IsFacing(target,source);
 		}
 	}
 }

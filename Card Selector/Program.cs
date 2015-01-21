@@ -117,7 +117,7 @@ namespace CardSelector
             var drawR = Config.Item("RRange").GetValue<Circle>();
             if (drawR.Active && !myHero.IsDead)
             {
-                Utility.DrawCircle(ObjectManager.Player.Position, 5500, drawR.Color, 1, 23, true);
+                Render.Circle.DrawCircle(ObjectManager.Player.Position, 5500, drawR.Color, 1, true);
             }
         }
                     		
@@ -126,13 +126,13 @@ namespace CardSelector
         	var drawQ = Config.Item("QRange").GetValue<Circle>();
             if (drawQ.Active && !myHero.IsDead)
             {
-                Utility.DrawCircle(myHero.Position, 1450, drawQ.Color);
+                Render.Circle.DrawCircle(myHero.Position, 1450, drawQ.Color);
             }
 
             var drawW = Config.Item("WRange").GetValue<Circle>();
             if (drawW.Active && !myHero.IsDead)
             {
-                Utility.DrawCircle(myHero.Position, 700, drawW.Color);
+                Render.Circle.DrawCircle(myHero.Position, 700, drawW.Color);
             }                       
         } 		
     }

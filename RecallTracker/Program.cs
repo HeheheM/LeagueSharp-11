@@ -18,7 +18,7 @@ namespace RecallTracker
 		
 		static void Game_OnGameLoad(EventArgs args)
 		{
-			foreach (Obj_AI_Hero hero in ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsValid ))
+			foreach (Obj_AI_Hero hero in ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsValid && hero.IsEnemy))
 			{
 				_recalls.Add(new Recall(hero));
 			}
