@@ -9,9 +9,49 @@ using LeagueSharp.Common;
 #endregion
 
 namespace JungleTimer
-{	
+{
 	internal class Program
 	{
+		private class JungleCamp
+		{
+			public string Name;
+			public int NextRespawnTime;
+			public int RespawnTime;
+			public bool IsDead;
+			public bool Visibled;
+			public Vector3 Position;
+			public string[] Names;
+			public readonly int Id;
+			public JungleCamp(string name, int respawnTime, Vector3 position, string[] names, int id)
+			{
+				Name = name;
+				RespawnTime = respawnTime;
+				Position = position;
+				Names = names;
+				IsDead = false;
+				Visibled = false;
+				Id = id;
+			}
+		}
+		
+		private class DrawText
+		{
+			private static int _layer;
+			public Render.Text Text { get; set; }
+			public JungleCamp JungleCamp;
+			public DrawText(JungleCamp camp)
+			{
+				Text = new Render.Text(Drawing.WorldToMinimap(camp.Position),"",15,SharpDX.Color.White)
+				{
+					VisibleCondition = sender => (camp.NextRespawnTime > 0 ),
+					TextUpdate = () => (camp.NextRespawnTime - (int)Game.ClockTime).ToString(CultureInfo.InvariantCulture),
+				};
+				JungleCamp = camp;
+				Text.Add(_layer);
+				_layer++;
+			}
+		}
+		
 		private static readonly List<JungleCamp> _jungleCamps = new List<JungleCamp>();
 		private static readonly List<DrawText> _DrawText = new List<DrawText>();
 		private static int _nextTime;
@@ -21,7 +61,7 @@ namespace JungleTimer
 			CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
 		}
 		
-		private static void Game_OnGameLoad(EventArgs args)
+		private static void Initialize()
 		{
 			if (Utility.Map.GetMap().Type == Utility.Map.MapType.SummonersRift)
 			{
@@ -175,6 +215,11 @@ namespace JungleTimer
 				Game.PrintChat("JungleTimer loaded!");
 			}
 			else Game.PrintChat("Jungle Timer only supports SummonersRift and TwistedTreeline maps.");
+		}
+		
+		private static void Game_OnGameLoad(EventArgs args)
+		{
+			Utility.DelayAction.Add(4000, () => Initialize());
 		}
 		
 		private static void Game_OnGameUpdate(EventArgs args)
