@@ -104,7 +104,8 @@ namespace SFXUtility.Feature
                             new Vector2(barPos.X + 45 + (float) offset, barPos.Y + 23), hpLinesThickness,
                             killable ? hpKillableColor : hpUnkillableColor);
                     }
-                    if (Menu.Item(Name + "DrawingCircleEnabled").GetValue<bool>() && killable)
+                    if (Menu.Item(Name + "DrawingCircleEnabled").GetValue<bool>() && killable
+                            && minion.IsOnScreen())
                     {
                         Render.Circle.DrawCircle(minion.Position, minion.BoundingRadius + radius, circleColor, circleThickness);
                     }
