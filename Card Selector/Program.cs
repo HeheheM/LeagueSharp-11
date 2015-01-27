@@ -10,26 +10,26 @@ using LeagueSharp.Common;
 
 namespace CardSelector
 {
-    internal class Program
-    {
-        private static Menu Config;
-        private static Obj_AI_Hero myHero;
-        private static Vector2 PingLocation;
-        private static int LastPingT;
+	internal class Program
+	{
+		private static Menu Config;
+		private static Obj_AI_Hero myHero;
+		private static Vector2 PingLocation;
+		private static int LastPingT;
 		
-        private static void Main(string[] args)
-        {
-            CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
-        }
-                       
-        private static void Game_OnGameLoad(EventArgs args)
-        {
-        	myHero = ObjectManager.Player;
-        	
-           	if (myHero.ChampionName != "TwistedFate") return;
+		private static void Main(string[] args)
+		{
+			CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
+		}
+		
+		private static void Game_OnGameLoad(EventArgs args)
+		{
+			myHero = ObjectManager.Player;
+			
+			if (myHero.ChampionName != "TwistedFate") return;
 			
 			LastPingT = 0;
-          			
+			
 			Config = new Menu("Card Selector", "Card Selector", true);
 			
 			Config.AddSubMenu(new Menu("Card Selector", "CardSelector"));
@@ -41,99 +41,119 @@ namespace CardSelector
 			Config.AddSubMenu(new Menu("Drawings", "Drawings"));
 			Config.SubMenu("Drawings").AddItem(new MenuItem("QRange", "Q range").SetValue(new Circle(true, Color.FromArgb(255, 255, 255, 255))));
 			Config.SubMenu("Drawings").AddItem(new MenuItem("WRange", "W range").SetValue(new Circle(false, Color.FromArgb(255, 255, 255, 255))));
-			Config.SubMenu("Drawings").AddItem(new MenuItem("RRange", "R range").SetValue(new Circle(false, Color.FromArgb(255, 255, 255, 255))));				
-			Config.AddToMainMenu();       
+			Config.SubMenu("Drawings").AddItem(new MenuItem("RRange", "R range").SetValue(new Circle(false, Color.FromArgb(255, 255, 255, 255))));
+			Config.AddToMainMenu();
 			
 			Game.PrintChat("Card Selector loaded!");
 
 			Game.OnGameUpdate += Game_OnGameUpdate;
 			Drawing.OnEndScene += DrawingOnOnEndScene;
-			Drawing.OnDraw += Drawing_OnDraw;	
-        }
-        
-        private static void Ping(Vector2 position)
-        {
-            if (Environment.TickCount - LastPingT < 30 * 1000) return;
-            LastPingT = Environment.TickCount;
-            PingLocation = position;
-            SimplePing();
-            Utility.DelayAction.Add(150, SimplePing);
-            Utility.DelayAction.Add(300, SimplePing);
+			Drawing.OnDraw += Drawing_OnDraw;
+		}
+		
+		private static void Ping(Vector2 position)
+		{
+			if (Environment.TickCount - LastPingT < 30 * 1000) return;
+			LastPingT = Environment.TickCount;
+			PingLocation = position;
+			SimplePing();
+			Utility.DelayAction.Add(150, SimplePing);
+			Utility.DelayAction.Add(300, SimplePing);
 			Utility.DelayAction.Add(450, SimplePing);
-        }
+		}
 
-        private static void SimplePing()
-        {
- 			Packet.S2C.Ping.Encoded(new Packet.S2C.Ping.Struct(PingLocation.X, PingLocation.Y, 0, 0, Packet.PingType.Fallback)).Process();
-        }
-        
-        private static bool Killable(Obj_AI_Hero hero)
-        {   
-            var dmg = 0d;
-            dmg += myHero.GetSpellDamage(hero, SpellSlot.Q) * 2;
-            dmg += myHero.GetSpellDamage(hero, SpellSlot.W);
+		private static void SimplePing()
+		{
+			Packet.S2C.Ping.Encoded(new Packet.S2C.Ping.Struct(PingLocation.X, PingLocation.Y, 0, 0, Packet.PingType.Fallback)).Process();
+		}
+		
+		private static bool Killable(Obj_AI_Hero hero)
+		{
+			var dmg = 0d;
+			dmg += myHero.GetSpellDamage(hero, SpellSlot.Q) * 2;
+			dmg += myHero.GetSpellDamage(hero, SpellSlot.W);
 
-            if (Items.HasItem("ItemBlackfireTorch"))
-            {
-                dmg += myHero.GetItemDamage(hero, Damage.DamageItems.Dfg);
-                dmg = dmg * 1.2;
-            }
+			if (Items.HasItem("ItemBlackfireTorch"))
+			{
+				dmg += myHero.GetItemDamage(hero, Damage.DamageItems.Dfg);
+				dmg = dmg * 1.2;
+			}
 
-            if(myHero.GetSpellSlot("SummonerIgnite") != SpellSlot.Unknown)
-            {
-                dmg += myHero.GetSummonerSpellDamage(hero, Damage.SummonerSpell.Ignite);
-            }
-            
-            if (dmg > hero.Health) return true;
-            else return false;
-        }
-                          
-        private static void Game_OnGameUpdate(EventArgs args)
-        {     
-        	if (Config.Item("Ping").GetValue<bool>())
-        		foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(h => myHero.Spellbook.CanUseSpell(SpellSlot.R) == SpellState.Ready && h.IsValidTarget() && Killable(h)))
-                {
-                    Ping(enemy.Position.To2D());
-                }
-        	
-        	if (Config.Item("Yellow").GetValue<KeyBind>().Active)
-            {
-                CardSelector.StartSelecting(Cards.Yellow);
-            }
+			if(myHero.GetSpellSlot("SummonerIgnite") != SpellSlot.Unknown)
+			{
+				dmg += myHero.GetSummonerSpellDamage(hero, Damage.SummonerSpell.Ignite);
+			}
+			
+			if (dmg > hero.Health) return true;
+			else return false;
+		}
+		
+		private static void Game_OnGameUpdate(EventArgs args)
+		{
+			if (Config.Item("Ping").GetValue<bool>())
+				foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(h => myHero.Spellbook.CanUseSpell(SpellSlot.R) == SpellState.Ready && h.IsValidTarget() && Killable(h)))
+			{
+				Ping(enemy.Position.To2D());
+			}
+			
+			if (Config.Item("Yellow").GetValue<KeyBind>().Active)
+			{
+				CardSelector.StartSelecting(Cards.Yellow);
+			}
 
-            if (Config.Item("Blue").GetValue<KeyBind>().Active)
-            {
-                CardSelector.StartSelecting(Cards.Blue);
-            }
+			if (Config.Item("Blue").GetValue<KeyBind>().Active)
+			{
+				CardSelector.StartSelecting(Cards.Blue);
+			}
 
-            if (Config.Item("Red").GetValue<KeyBind>().Active)
-            {
-                CardSelector.StartSelecting(Cards.Red);
-            }			
-        }
-        
-        private static void DrawingOnOnEndScene(EventArgs args)
-        {
-            var drawR = Config.Item("RRange").GetValue<Circle>();
-            if (drawR.Active && !myHero.IsDead)
-            {
-                Render.Circle.DrawCircle(ObjectManager.Player.Position, 5500, drawR.Color, 1, true);
-            }
-        }
-                    		
- 		private static void Drawing_OnDraw(EventArgs args)
-        {
-        	var drawQ = Config.Item("QRange").GetValue<Circle>();
-            if (drawQ.Active && !myHero.IsDead)
-            {
-                Render.Circle.DrawCircle(myHero.Position, 1450, drawQ.Color);
-            }
+			if (Config.Item("Red").GetValue<KeyBind>().Active)
+			{
+				CardSelector.StartSelecting(Cards.Red);
+			}
+		}
+		
+		private static void DrawingOnOnEndScene(EventArgs args)
+		{
+			var drawR = Config.Item("RRange").GetValue<Circle>();
+			if (drawR.Active && !myHero.IsDead)
+			{
+				var pointList = new List<Vector3>();
+				var center = ObjectManager.Player.ServerPosition;
+				for (var i = 0; i < 23; i++)
+				{
+					var angle = i * Math.PI * 2 / 23;
+					pointList.Add(
+						new Vector3(
+							center.X + 5500 * (float) Math.Cos(angle), center.Y + 5500 * (float) Math.Sin(angle),
+							center.Z));
+				}
 
-            var drawW = Config.Item("WRange").GetValue<Circle>();
-            if (drawW.Active && !myHero.IsDead)
-            {
-                Render.Circle.DrawCircle(myHero.Position, 700, drawW.Color);
-            }                       
-        } 		
-    }
+				for (var i = 0; i < pointList.Count; i++)
+				{
+					var a = pointList[i];
+					var b = pointList[i == pointList.Count - 1 ? 0 : i + 1];
+
+					var aonScreen = Drawing.WorldToMinimap(a);
+					var bonScreen = Drawing.WorldToMinimap(b);
+
+					Drawing.DrawLine(aonScreen.X, aonScreen.Y, bonScreen.X, bonScreen.Y, 1, drawR.Color);
+				}
+			}
+		}
+		
+		private static void Drawing_OnDraw(EventArgs args)
+		{
+			var drawQ = Config.Item("QRange").GetValue<Circle>();
+			if (drawQ.Active && !myHero.IsDead)
+			{
+				Render.Circle.DrawCircle(myHero.Position, 1450, drawQ.Color);
+			}
+
+			var drawW = Config.Item("WRange").GetValue<Circle>();
+			if (drawW.Active && !myHero.IsDead)
+			{
+				Render.Circle.DrawCircle(myHero.Position, 700, drawW.Color);
+			}
+		}
+	}
 }
