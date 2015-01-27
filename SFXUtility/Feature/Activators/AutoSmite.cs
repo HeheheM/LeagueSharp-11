@@ -203,14 +203,16 @@ namespace SFXUtility.Feature
 
                 var circleThickness = BaseMenu.Item("MiscCircleThickness").GetValue<Slider>().Value;
 
-                if (SmiteEnabled && Menu.Item(Name + "DrawingSmiteRange").GetValue<bool>())
+                if (SmiteEnabled && Menu.Item(Name + "DrawingSmiteRange").GetValue<bool>()
+                        && ObjectManager.Player.Position.IsOnScreen())
                 {
                     Render.Circle.DrawCircle(ObjectManager.Player.Position, _smite.Range,
                         _smite.CanUseSpell() && _smite.IsInRange(_currentMinion)
                             ? Menu.Item(Name + "DrawingUseableColor").GetValue<Color>()
                             : Menu.Item(Name + "DrawingUnusableColor").GetValue<Color>(), circleThickness);
                 }
-                if (HeroSpellEnabled && Menu.Item(Name + "DrawingHeroSpellsRange").GetValue<bool>())
+                if (HeroSpellEnabled && Menu.Item(Name + "DrawingHeroSpellsRange").GetValue<bool>()
+                        && ObjectManager.Player.Position.IsOnScreen())
                 {
                     Render.Circle.DrawCircle(ObjectManager.Player.Position, _heroSpell.Range + _currentMinion.BoundingRadius,
                         _heroSpell.CanUseSpell() && _heroSpell.IsInRange(_currentMinion)
@@ -218,7 +220,8 @@ namespace SFXUtility.Feature
                             : Menu.Item(Name + "DrawingUnusableColor").GetValue<Color>(), circleThickness);
                 }
                 if (_currentMinion != null && _currentMinion.IsVisible && !_currentMinion.IsDead &&
-                    Menu.Item(Name + "DrawingDamageTillSmite").GetValue<bool>())
+                    Menu.Item(Name + "DrawingDamageTillSmite").GetValue<bool>()
+                        && _currentMinion.Position.IsOnScreen())
                 {
                     Utilities.DrawTextCentered(Drawing.WorldToScreen(_currentMinion.Position),
                         Menu.Item(Name + "DrawingDamageColor").GetValue<Color>(),
