@@ -1,4 +1,4 @@
-﻿#region License
+#region License
 
 /*
  Copyright 2014 - 2014 Nikita Bernthaler
@@ -133,7 +133,7 @@ namespace SFXUtility.Feature
 
 				BaseMenu.AddSubMenu(Menu);
 
-				Game.OnGameUpdate += OnGameUpdate;
+				Game.OnUpdate += OnGameUpdate;
 				Initialized = true;
 			}
 			catch (Exception ex)
