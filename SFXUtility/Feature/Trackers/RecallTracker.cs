@@ -84,7 +84,7 @@ namespace SFXUtility.Feature
 				int count = 0;
 				foreach (Recall recall in _recalls)
 				{
-					if (recall.LastStatus != Packet.S2C.Teleport.Status.Unknown)
+					if (recall.LastStatus != Network.Packets.S2C.Teleport.Status.Unknown)
 					{
 						var text = recall.ToString();
 						if (recall.Update() && !string.IsNullOrWhiteSpace(text))
@@ -130,7 +130,7 @@ namespace SFXUtility.Feature
 			try
 			{
 				if (!Enabled) return;					
-				Packet.S2C.Teleport.Struct decoded = Packet.S2C.Teleport.Decoded(sender, args);
+				Network.Packets.S2C.Teleport.Struct decoded = Network.Packets.S2C.Teleport.Decoded(sender, args);
 				var recall = _recalls.FirstOrDefault(r => r.Hero.NetworkId == decoded.UnitNetworkId);
 				if (!Equals(recall, default(Recall)))
 				{
@@ -215,7 +215,7 @@ namespace SFXUtility.Feature
 			public Recall(Obj_AI_Hero hero)
 			{
 				Hero = hero;
-				LastStatus = Packet.S2C.Teleport.Status.Unknown;
+				LastStatus = Network.Packets.S2C.Teleport.Status.Unknown;
 				LastStatusType = Packet.S2C.Teleport.Type.Unknown;
 			}
 
@@ -240,7 +240,7 @@ namespace SFXUtility.Feature
 				set
 				{
 					_lastStatus = value;
-					_recallStart = _lastStatus == Packet.S2C.Teleport.Status.Start
+					_recallStart = _lastStatus == Network.Packets.S2C.Teleport.Status.Start
 						? Game.Time
 						: 0f;
 					_lastActionTime = Game.Time;
@@ -258,7 +258,7 @@ namespace SFXUtility.Feature
 				{
 					time = Game.Time - _lastActionTime;
 				}
-				if (LastStatusType == Packet.S2C.Teleport.Type.Recall)
+				if (LastStatusType == Network.Packets.S2C.Teleport.Type.Recall)
 				{
 					if (LastStatus == Packet.S2C.Teleport.Status.Start)
 						return string.Format("Recall: {0}({1}%) Recalling ({2:0.00})", Hero.ChampionName,
@@ -296,18 +296,18 @@ namespace SFXUtility.Feature
 
 			public Color ToColor()
 			{
-				if (LastStatus == Packet.S2C.Teleport.Status.Start)
+				if (LastStatus == Network.Packets.S2C.Teleport.Status.Start)
 					return Color.Beige;
-				if (LastStatus == Packet.S2C.Teleport.Status.Finish)
+				if (LastStatus == Network.Packets.S2C.Teleport.Status.Finish)
 					return Color.GreenYellow;
-				if (LastStatus == Packet.S2C.Teleport.Status.Abort)
+				if (LastStatus == Network.Packets.S2C.Teleport.Status.Abort)
 					return Color.Red;
 				return Color.Black;
 			}
 
 			public bool Update()
 			{
-				var additional = LastStatus == Packet.S2C.Teleport.Status.Start
+				var additional = LastStatus == Network.Packets.S2C.Teleport.Status.Start
 					? Duration + 20f
 					: 20f;
 				if (_lastActionTime + additional <= Game.Time)
