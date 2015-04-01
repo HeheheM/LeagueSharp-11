@@ -1,4 +1,4 @@
-﻿#region License
+#region License
 
 /*
  Copyright 2014 - 2014 Nikita Bernthaler
@@ -93,7 +93,7 @@ namespace SFXUtility.Feature
 
                 BaseMenu.AddSubMenu(Menu);
 
-                Game.OnGameSendPacket += OnGameSendPacket;
+                Game.OnSendPacket += OnGameSendPacket;
                 
                 Initialized = true;
             }
@@ -113,9 +113,9 @@ namespace SFXUtility.Feature
                 var spellsDelay = Menu.Item(Name + "DelaySpells").GetValue<Slider>().Value;
                 var movementDelay = Menu.Item(Name + "DelayMovement").GetValue<Slider>().Value;
 
-                if (spellsDelay > 0 && (new GamePacket(args.PacketData)).Header == Packet.C2S.Cast.Header)
+                if (spellsDelay > 0 && (new GamePacket(args.PacketData)).Header == Network.Packets.C2S.Cast.Header)
                 {
-                    Packet.C2S.Cast.Struct castStruct = Packet.C2S.Cast.Decoded(args.PacketData);
+                    Network.Packets.C2S.Cast.Struct castStruct = Packet.C2S.Cast.Decoded(args.PacketData);
                     if (castStruct.SourceNetworkId == ObjectManager.Player.NetworkId)
                     {
                         if (_lastSpell + spellsDelay > Environment.TickCount)
@@ -131,7 +131,7 @@ namespace SFXUtility.Feature
 
                 if (movementDelay > 0 && (new GamePacket(args.PacketData)).Header == Packet.C2S.Move.Header)
                 {
-                    Packet.C2S.Move.Struct movementStruct = Packet.C2S.Move.Decoded(args.PacketData);
+                    Network.Packets.C2S.Move.Struct movementStruct = Packet.C2S.Move.Decoded(args.PacketData);
                     if (movementStruct.MoveType == 2)
                     {
                         if (movementStruct.SourceNetworkId == ObjectManager.Player.NetworkId)
