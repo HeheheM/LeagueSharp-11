@@ -1,4 +1,4 @@
-﻿#region
+#region
 using System;
 using System.Collections.Generic;
 using Color = System.Drawing.Color;
@@ -98,7 +98,7 @@ namespace LightningRyze
 			
 			Game.PrintChat("Lightning Ryze loaded!");
 
-			Game.OnGameUpdate += Game_OnGameUpdate;
+			Game.OnUpdate += Game_OnGameUpdate;
 			Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
 			Drawing.OnDraw += Drawing_OnDraw;
 			AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
