@@ -1,4 +1,4 @@
-﻿#region
+#region
 using System;
 using System.Collections.Generic;
 using Color = System.Drawing.Color;
@@ -120,7 +120,7 @@ namespace LightningLux
 			
 			Game.PrintChat("Lightning Lux loaded!");
 
-			Game.OnGameUpdate += Game_OnGameUpdate;
+			Game.OnUpdate += Game_OnGameUpdate;
 			xSLxOrbwalker.BeforeAttack += Orbwalking_BeforeAttack;
 //			Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
 			Drawing.OnDraw += Drawing_OnDraw;
