@@ -1,4 +1,4 @@
-﻿#region License
+#region License
 
 /*
  Copyright 2014 - 2014 Nikita Bernthaler
@@ -167,7 +167,7 @@ namespace SFXUtility.Feature
 						};
 						_heroSpell = _heroSpells.FirstOrDefault(s => s.Available);
 
-						Game.OnGameUpdate += OnGameUpdate;
+						Game.OnUpdate += OnGameUpdate;
 						Drawing.OnDraw += OnDraw;
 
 						Initialized = true;
